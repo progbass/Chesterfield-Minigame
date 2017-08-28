@@ -64,7 +64,7 @@ Preload.prototype = {
 		///////////////////////////
 		// PLAY NEXT SCENE
 		///////////////////////////
-	    this.game.state.start('play');
+	    this.game.state.start('intro');
 	}
 };
 
