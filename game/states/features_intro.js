@@ -28,7 +28,7 @@ Features.prototype = {
       // PLAY NEXT SCENE
       ///////////////////////////
       // Play scene after a fixed time interval
-      this.delay = Phaser.Timer.SECOND * 8;
+      this.delay = Phaser.Timer.SECOND * 11;
       this.game.time.events.add(this.delay, function(){
         // State Transition
         var slideIn = Phaser.Plugin.StateTransition.Out.SlideLeft;
