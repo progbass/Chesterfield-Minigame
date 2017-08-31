@@ -59,8 +59,14 @@ Play.prototype = {
     this.game.score = 0;
     this.game.coins_total = 0;
     this.game.coins_single = 0;
+    this.levelsConfig = [
+        [6, -1, 4, 2, -1, 7, 1, 0, 5, -1, 5, 6, -1, 7, 5, -1, 6, -1, 7, 5, -1, 6, 5, 4, -1, 7],
+        [-1, 7, 5, 0, 5, 6, 2, 3, -1, 7, 1, 0, 5, 6, 7, 5, -1, 0, 7, 5, -1, 6, 7, 5, -1, 5, 6, 3, -1],
+        [-1, 7, 1, 0, 5, -1, 7, 5, -1, -1, 6, 4, 2, -1, 7, 3, -1, 7, 1, 0, 5, -1, 7, 6, 1, 5, -1, 6, -1, 7, 5]
+    ];
+    this.enemy_levelIndex = 0;
 
-
+ 
 
     ///////////////////////////
     // BACKGROUND
@@ -310,14 +316,17 @@ Play.prototype = {
     
     
    createIcon: function(){  
+    let coinType = this.levelsConfig[this.game.level-1][this.enemy_levelIndex];
+    
+    //Counter
+    this.enemy_levelIndex++;
        
-    if(!Math.round(Math.random())){
-       return false;
+    if(coinType == -1){
+        return;
     }
-       
     // New Coin 
     this.coinsAngle = 45;
-    var coin = new Coin(this.game, 0, 0);
+    var coin = new Coin(this.game, 0, 0, coinType);
     this.coinsGroup.add(coin);
    },
     
@@ -365,11 +374,12 @@ Play.prototype = {
 
     // If level is greter than 1
     if(this.game.level > 1){
-        var levelSpeed = [780, 650, 500, 400];
+      var levelSpeed = [780, 650, 500, 400];
+      
       // Update Level Seed
       this.game.level_speed = levelSpeed[this.game.level-1];//(this.game.level_speed - 80) * .9; 
       this.loopTimer.delay = this.game.level_speed;
-        console.log(this.icon_update);
+      this.enemy_levelIndex = 0;
 
       // Play Sound FX
       this.game.fx_state.play();
