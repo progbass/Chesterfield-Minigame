@@ -60,6 +60,10 @@ module.exports = function (grunt) {
       dist: {
         files: [
           // includes files within path and its sub-directories
+          { expand: true, src: ['bower_components/webfontloader/webfontloader.js'], dest: 'dist/js/', flatten: true },
+          { expand: true, src: ['bower_components/howler.js/dist/howler.min.js'], dest: 'dist/js/', flatten: true },
+          { expand: true, src: ['bower_components/phaser-official/build/phaser.min.js'], dest: 'dist/js/', flatten: true },
+          { expand: true, src: ['bower_components/phaser-state-transition/dist/phaser-state-transition.min.js'], dest: 'dist/js/', flatten: true },
           { expand: true, src: ['css/**'], dest: 'dist/' },
           { expand: true, src: ['index.html'], dest: 'dist/' },
           { expand: true, src: ['fonts/**'], dest: 'dist/' },
@@ -95,7 +99,7 @@ module.exports = function (grunt) {
   grunt.registerTask('build', ['browserify', 'copy']);
   grunt.registerTask('serve', ['build', 'browserSync', 'watch']);
   grunt.registerTask('default', ['serve']);
-  grunt.registerTask('prod', ['build', 'uglify']);
+  grunt.registerTask('prod', ['build', 'copy']);
 
   grunt.registerTask('buildBootstrapper', 'builds the bootstrapper file correctly', function() {
     var stateFiles = grunt.file.expand('game/states/*.js');
