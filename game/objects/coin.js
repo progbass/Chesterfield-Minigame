@@ -10,18 +10,15 @@ Coin = function (game, _x, _y, _frame) {
     this.valid = true;
     this.liveInterval = 0;
 	this.timeActive = false;
-    this.timeInit = 0;
     this.timeDelay = 4;
     this.timesMoved = 0;
 
     // 
     this.randomize(_frame);
-    this.render()
 };
 
 Coin.prototype = Object.create(Phaser.Sprite.prototype);
 Coin.prototype.constructor = Coin;
-Coin.prototype.create = function () {};
 
 Coin.prototype.randomize = function(_frame){
     //
@@ -39,13 +36,6 @@ Coin.prototype.dissapearHandler = function(){
     }, this);
 }
 
-Coin.prototype.update = function() {
-    /*if( this.timeActive && this.game.time.time >= this.timeInit+(Phaser.Timer.SECOND * this.timeDelay)){
-        this.dissapearHandler();
-    }*/
-};
-
-
 
 Coin.prototype.move = function(){
     this.timesMoved++;
@@ -59,26 +49,23 @@ Coin.prototype.move = function(){
 }
 
 
-Coin.prototype.render = function() {
-    //this.game.debug.geom(this.position, '#ffff00');
-    this.game.debug.body(this);
-};
 
 
-Coin.prototype.setupFrame = function(_label) {
+Coin.prototype.setupFrame = function() {
 
 	// Sprite Configuration
+    this.timesMoved = 0;
 	this.valid = (this.frame > 3) ? true : false;
     var targetScale = 0.67;
     var bodyScale = 0.65;
+    this.x = 0; this.y = 0;
+    this.rotation = 0;
     this.pivot.x = -320;//* Math.sin(this.coinsAngle);
     //coin.pivot.y = 0;
     
 
 	// Living Time Lapse
 	this.timeActive = true;
-	this.timeInit = this.game.time.time;
-    
     
 	// 
 	switch(this.frame){
@@ -125,6 +112,7 @@ Coin.prototype.setupFrame = function(_label) {
     // Animation
     this.scale.setTo( targetScale );
     this.body.setSize(this.width*bodyScale, this.height*bodyScale, (this.width*bodyScale)/2, (this.height*bodyScale)/2);
+    console.log(this)
     var scaleTween = this.game.add.tween(this.scale).from( {x: 0, y: 0}, 300, Phaser.Easing.Back.Out, true);
 };
 
@@ -137,10 +125,10 @@ Coin.prototype.randomFrame = function(){
 
 
 
-Coin.prototype.fixFrame = function(_frame, _label) {    
+Coin.prototype.fixFrame = function(_frame) {    
 	// 
     this.frame = _frame;
-    this.setupFrame(_label);
+    this.setupFrame();
 };
 
 

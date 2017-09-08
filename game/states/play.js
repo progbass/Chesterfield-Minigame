@@ -7,7 +7,7 @@ Play.prototype = {
 
   /*--------------------------------------
     ON RENDER
-  ---------------------------------------*/
+  ---------------------------------------
   render: function(){
     //this.game.debug.body(this.hero.laser);
       
@@ -19,7 +19,7 @@ Play.prototype = {
       this.game.debug.body(this.hero);
       this.game.debug.spriteBounds(this.back_display);
     }
-  },
+  },*/
 
 
 
@@ -65,6 +65,11 @@ Play.prototype = {
         [-1, 7, 1, 0, 5, -1, 7, 5, -1, -1, 6, 4, 2, -1, 7, 3, -1, 7, 1, 0, 5, -1, 7, 6, 1, 5, -1, 6, -1, 7, 5]
     ];
     this.enemy_levelIndex = 0;
+    this.enemy_interval = 0;
+      
+    this.update_delay = 40;
+    this.update_lastTime = 0;
+      
 
  
 
@@ -242,19 +247,12 @@ Play.prototype = {
     this.modalWindow_visible = false;
 
     // create Background
-    //var level_overlay = this.game.add.graphics(0,0);
     var level_overlay = this.game.add.sprite(0,0, 'modal_background');
     level_overlay.alpha = 0.9;
-    //level_overlay.beginFill(0x000000, .6);
-    //level_overlay.boundsPadding = 0;
-    //level_overlay.drawRect(0, 0, this.game.width, this.game.height);
 
     // Label
-    //this.level_label = new Phaser.Text(this.game, this.game.world.centerX, this.game.world.centerY-40, 'NIVEL '+this.game.level, this.game.font_style);
     this.level_label = this.game.add.sprite(this.world.centerX, this.world.centerY-20, 'play_level_display');
     this.level_label.anchor.setTo(.5,.5);
-    //this.level_label.fontSize = '100pt';
-    //this.level_label.fill = '#ffffff';
 
     // Create Group
     this.levelDisplayGroup = new Phaser.Group(this.game);
@@ -307,35 +305,15 @@ Play.prototype = {
     var tween = this.game.add.tween(this.planetGroup).to( { angle: amount-22.5 }, 240, Phaser.Easing.Circular.InOut, true);
 
       
-    // Make sure that there´s at leat 1 'valid' coin
-    this.coinsGroup.forEach(function(_child){
+    // Move alive coins
+    this.coinsGroup.forEachAlive(function(_child){
         // Move Icon
         _child.move();    
     }, this);
   },
     
     
-   createIcon: function(){  
-    let coinType = this.levelsConfig[this.game.level-1][this.enemy_levelIndex];
     
-    //Counter
-    this.enemy_levelIndex++;
-       
-    if(coinType == -1){
-        return;
-    }
-    // New Coin 
-    this.coinsAngle = 45;
-    var coin = new Coin(this.game, 0, 0, coinType);
-    this.coinsGroup.add(coin);
-   },
-    
-    
-    
-    spawnHandler: function(){
-        this.createIcon();
-        this.rotatePlanet();
-    },
 
 
   /*--------------------------------------
@@ -343,7 +321,7 @@ Play.prototype = {
   ---------------------------------------*/
   initGame: function(){
     // remove init delay timer;
-    this.game.time.events.remove(this.initDelayTimer );
+    this.game.time.events.remove(this.initDelayTimer);
 
     // Show Level
     this.updateLevel();
@@ -356,11 +334,6 @@ Play.prototype = {
 
     // Game Init Flag (Start to Spawn Enemies)
     this.gameInit = true;
-      
-    this.icon_update = this.game.time.create();
-    this.loopTimer = this.icon_update.loop(this.game.level_speed, this.spawnHandler, this);
-    this.icon_update .start();
-    this.rotatePlanet();
   },
 
 
@@ -378,7 +351,6 @@ Play.prototype = {
       
       // Update Level Seed
       this.game.level_speed = levelSpeed[this.game.level-1];//(this.game.level_speed - 80) * .9; 
-      this.loopTimer.delay = this.game.level_speed;
       this.enemy_levelIndex = 0;
 
       // Play Sound FX
@@ -486,30 +458,29 @@ Play.prototype = {
 
     
     if(this.gameInit){
-        /////////////////////////////////////
-        /// HERO DRAG
-        /////////////////////////////////////
-        /// Check for collisions
-        this.game.physics.arcade.overlap(
-          this.hero.laser,
-          this.coinsGroup,
-          this.getCoin,
-          this.processHandler,
-          this
-        ); 
-    }
-    
+        if (this.game.time.now > this.update_lastTime){
+            /////////////////////////////////////
+            /// HERO DRAG
+            /////////////////////////////////////
+            /// Check for collisions
+            this.game.physics.arcade.overlap(
+              this.hero.laser,
+              this.coinsGroup,
+              this.getCoin,
+              this.processHandler,
+              this
+            ); 
+            
+            this.update_lastTime = this.game.time.now + this.update_delay;
+        }
       
-    return
-
-
-
-    /////////////////////////////////////
-    /// COINS SPAWN
-    //console.log(this.coinsGroup.countLiving())
-    if (!this.modalWindow_visible && this.gameInit ) {
-        // Spawn new Coin
-        this.spawnCoin();
+      
+        if( !this.modalWindow_visible ){ 
+            if(this.game.time.now > this.enemy_interval){
+                this.spawnEnemy();
+                this.enemy_interval = this.game.time.now + this.game.level_speed;
+            }
+        }
     }
   },
 
@@ -613,34 +584,6 @@ Play.prototype = {
 
 
 
-
-
-  /*------------------------------------------------------
-    'COIN OUT OF WORLD' HANDLER
-  -------------------------------------------------------*/
-  coinOut: function(_target){
-    if(_target.valid){
-
-      // Check Coin Type for calculating score
-      var points_content = '-50';
-      var points_flag = false;
-      this.game.score -= 50;
-      this.updateScore();
-
-      // Display Points
-      this.pointsDisplay(points_content, {x: _target.body.x, y: _target.body.y}, points_flag);
-    
-      // Show Overlay
-      this.showOverlay();
-
-      // Play Sound FX
-      this.game.fx_bad.play();
-    }
-  },
-
-
-
-
   /*--------------------------------------------------
     SHOW LIGHTBOX OVERLAY
   ---------------------------------------------------*/
@@ -659,58 +602,49 @@ Play.prototype = {
   /*------------------------------------------------------
     SPAWN COIN
   -------------------------------------------------------*/
-  spawnCoin: function(){
+  spawnEnemy: function(){
     var offset = 10;
     var coin;
+    
+    // New Coin
+    let coinType = this.levelsConfig[this.game.level-1][this.enemy_levelIndex];
 
+    //Counter
+    this.enemy_levelIndex++;
+    
+    //
+    if(coinType == -1){
+        // Rotate Planet
+        this.rotatePlanet();
+        return;
+    }
 
 
     // If we have generated more spirtes than the maximum,
     // start recycling from pool of sprites
     if( this.game.coins_single >= this.game.coins_max ){
-      // Revive first dead Coin
-      //var coin = this.coinsGroup.getFirstDead();
+        // Revive first dead Coin
+        var coin = this.coinsGroup.getFirstDead();
+        coin.revive();
+        coin.fixFrame(coinType);
+        //console.log('old', coin);
+        
     } else {
-      // New Coin
-      //var coin = new Coin(this.game, slot_random, xPos, yPos);
+        
+        // New Coin 
+        var coin = new Coin(this.game, 0, 0, coinType);
+        this.coinsGroup.add(coin);
 
-      // Add coin to Group
-      //this.coinsGroup.add(coin);
-
-      //
-      this.game.coins_single++
+        // Coins counter
+        this.game.coins_single++
     }
-
-
-    // Make sure that there´s at leat 1 'valid' coin
-    if(this.coinsGroup.checkAll('valid', false)){
-      coin.fixFrame(0, 0);
-    }
-
-    
+      
+    // Rotate Planet
+    this.rotatePlanet();
+      
     // Update coins count
     this.game.coins_total++;
 
-  },
-
-
-
-
-  /*------------------------------------------------------
-    'ON COIN DOWN' HANDLER
-  -------------------------------------------------------*/
-  onDown: function(_sprite){
-    var points_content;
-    var points_flag = true;
-    if(!_sprite.valid){
-      points_content = '-20';
-      points_flag = false;
-      this.game.score -= 20;
-      this.updateScore();
-
-      // Display Points
-      this.pointsDisplay(points_content, {x: _sprite.body.x, y: _sprite.body.y}, points_flag);
-    }
   }
 
 };

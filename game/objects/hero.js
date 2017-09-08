@@ -12,7 +12,7 @@ Hero = function (game, _x, _y) {
     this.laser_sprite.anchor.setTo(0, 0.5);
     this.laser_sprite.scale.setTo(1,0);
     this.laser_sprite.alpha = 0;
-    this.laser_sprite.blendMode = PIXI.blendModes.MULTIPLY;
+    //this.laser_sprite.blendMode = PIXI.blendModes.MULTIPLY;
     
 
     var width = 250;
@@ -28,14 +28,11 @@ Hero = function (game, _x, _y) {
     this.laser.anchor.setTo(0,.5);
     this.laser.scale.x = 0;
     this.laser.alpha = 0.32;
-    this.laser.blendMode = PIXI.blendModes.MULTIPLY;
+    //this.laser.blendMode = PIXI.blendModes.MULTIPLY;
 };
 
 Hero.prototype = Object.create(Phaser.Group.prototype);
 Hero.prototype.constructor = Hero;
-Hero.prototype.update = function () { 
-};
-
 
 Hero.prototype.shoot = function(){
     if(this.shootIsActive){

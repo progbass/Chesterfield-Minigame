@@ -63,7 +63,7 @@ var initGame = function(){
   ///////////////////////////
   // PHASER GAME
   ///////////////////////////
-  game = new Phaser.Game(1024, 728, Phaser.CANVAS, 'main-container');
+  game = new Phaser.Game(1024, 728, Phaser.AUTO, 'main-container');
 
   // GLOBALE GAME VARIABLES
   game.coins_max = 10;
